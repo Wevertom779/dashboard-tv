@@ -2,56 +2,40 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard TV Wall</title>
+  <title>Apresentação Power BI - TV</title>
   <style>
-    * {
+    html, body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      width: 100%;
       height: 100%;
-      background-color: #000;
-      font-family: Arial, sans-serif;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      height: 100vh;
-      width: 100vw;
-    }
-
-    .frame {
-      border: 1px solid #333;
+      width: 100%;
       overflow: hidden;
+      background-color: #000;
     }
 
-    .frame iframe,
-    .frame video {
-      width: 100%;
-      height: 100%;
+    iframe {
+      transform: scale(1.8); /* 🔍 Zoom ajustável: 1.4 = 140% */
+      transform-origin: top left;
+      width: calc(100vw / 1.8);  /* Compensa o zoom para caber na tela */
+      height: calc(100vh / 1.8);
       border: none;
       display: block;
-    }
-
-    audio {
-      display: none;
     }
 
     #contador {
       position: absolute;
       bottom: 10px;
       right: 20px;
-      color: #0f0;
+      color: #00ff00;
       font-size: 16px;
-      background-color: rgba(0, 0, 0, 0.5);
-      padding: 5px 10px;
+      background-color: rgba(0,0,0,0.5);
+      padding: 4px 8px;
       border-radius: 5px;
-      z-index: 100;
+      z-index: 999;
+    }
+
+    audio {
+      display: none;
     }
   </style>
 </head>
@@ -63,61 +47,51 @@
     Seu navegador não suporta áudio HTML5.
   </audio>
 
-  <!-- ⏱️ Contador visual -->
-  <div id="contador">Próxima atualização em 10:00</div>
+  <!-- ⏳ Contador -->
+  <div id="contador">Próxima troca em 02:00</div>
 
-  <div class="grid">
-    <div class="frame">
-      <iframe id="pbi1"
-        src="https://app.powerbi.com/reportEmbed?reportId=cb6a4512-f624-468e-aba8-1cb556ceaed0&autoAuth=true&ctid=12a3af23-a769-4654-847f-958f3d479f4a"
-        allowfullscreen>
-      </iframe>
-    </div>
-    <div class="frame">
-      <iframe id="pbi2"
-        src="https://app.powerbi.com/reportEmbed?reportId=OUTRO_ID_AQUI&autoAuth=true&ctid=SEU_TENANT_ID"
-        allowfullscreen>
-      </iframe>
-    </div>
-    <div class="frame">
-      <iframe id="pbi3"
-        src="https://app.powerbi.com/reportEmbed?reportId=OUTRO_ID_AQUI&autoAuth=true&ctid=SEU_TENANT_ID"
-        allowfullscreen>
-      </iframe>
-    </div>
-    <div class="frame">
-      <iframe id="pbi4"
-        src="https://app.powerbi.com/reportEmbed?reportId=MAIS_UM_ID&autoAuth=true&ctid=SEU_TENANT_ID"
-        allowfullscreen>
-      </iframe>
-    </div>
-  </div>
+  <!-- 📊 Iframe Power BI -->
+  <iframe id="dashboard" src="https://app.powerbi.com/reportEmbed?reportId=cb6a4512-f624-468e-aba8-1cb556ceaed0&autoAuth=true&ctid=12a3af23-a769-4654-847f-958f3d479f4a"></iframe>
 
-  <!-- 🔁 Script: auto-refresh + contador -->
   <script>
-    const tempoRefresh = 10 * 60; // 10 minutos em segundos
-    let tempoRestante = tempoRefresh;
+    const relatorios = [
+      "https://app.powerbi.com/reportEmbed?reportId=cb6a4512-f624-468e-aba8-1cb556ceaed0&autoAuth=true&ctid=12a3af23-a769-4654-847f-958f3d479f4a",
+      "https://app.powerbi.com/reportEmbed?reportId=cb6a4512-f624-468e-aba8-1cb556ceaed0&autoAuth=true&ctid=12a3af23-a769-4654-847f-958f3d479f4a",
+      "https://app.powerbi.com/reportEmbed?reportId=cb6a4512-f624-468e-aba8-1cb556ceaed0&autoAuth=true&ctid=12a3af23-a769-4654-847f-958f3d479f4a",
+      "https://app.powerbi.com/reportEmbed?reportId=cb6a4512-f624-468e-aba8-1cb556ceaed0&autoAuth=true&ctid=12a3af23-a769-4654-847f-958f3d479f4a"
+    ];
+
+    const tempoPorRelatorio = 120; // segundos
+    let tempoRestante = tempoPorRelatorio;
+    let atual = 0;
+
+    const iframe = document.getElementById("dashboard");
+    const contador = document.getElementById("contador");
+
+    function mostrarRelatorio(index) {
+      const link = relatorios[index];
+      iframe.src = "";
+      setTimeout(() => {
+        iframe.src = link + "&t=" + new Date().getTime();
+      }, 100);
+      tempoRestante = tempoPorRelatorio;
+    }
 
     function atualizarContador() {
-      const minutos = Math.floor(tempoRestante / 60).toString().padStart(2, '0');
-      const segundos = (tempoRestante % 60).toString().padStart(2, '0');
-      document.getElementById('contador').innerText = `Próxima atualização em ${minutos}:${segundos}`;
-      if (tempoRestante > 0) {
-        tempoRestante--;
-      } else {
-        recarregarIframes();
-        tempoRestante = tempoRefresh;
+      const min = Math.floor(tempoRestante / 60).toString().padStart(2, "0");
+      const seg = (tempoRestante % 60).toString().padStart(2, "0");
+      contador.textContent = `Próxima troca em ${min}:${seg}`;
+
+      if (tempoRestante <= 0) {
+        atual = (atual + 1) % relatorios.length;
+        mostrarRelatorio(atual);
       }
+
+      tempoRestante--;
     }
 
-    function recarregarIframes() {
-      ['pbi1', 'pbi2', 'pbi3', 'pbi4'].forEach(id => {
-        const iframe = document.getElementById(id);
-        iframe.src = iframe.src;
-      });
-    }
-
-    setInterval(atualizarContador, 1000); // Atualiza contador a cada segundo
+    mostrarRelatorio(atual);
+    setInterval(atualizarContador, 1000);
   </script>
 
 </body>
