@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard TV Wall</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      font-family: Arial, sans-serif;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .frame {
+      border: 1px solid #333;
+      overflow: hidden;
+    }
+
+    .frame iframe,
+    .frame video {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    audio {
+      display: none;
+    }
+
+    #contador {
+      position: absolute;
+      bottom: 10px;
+      right: 20px;
+      color: #0f0;
+      font-size: 16px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🎵 Música de fundo -->
+  <audio autoplay loop>
+    <source src="musica.mp3" type="audio/mpeg">
+    Seu navegador não suporta áudio HTML5.
+  </audio>
+
+  <!-- ⏱️ Contador visual -->
+  <div id="contador">Próxima atualização em 10:00</div>
+
+  <div class="grid">
+    <div class="frame">
+      <iframe id="pbi1"
+        src="https://app.powerbi.com/reportEmbed?reportId=cb6a4512-f624-468e-aba8-1cb556ceaed0&autoAuth=true&ctid=12a3af23-a769-4654-847f-958f3d479f4a"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="frame">
+      <iframe id="pbi2"
+        src="https://app.powerbi.com/reportEmbed?reportId=cb6a4512-f624-468e-aba8-1cb556ceaed0&autoAuth=true&ctid=12a3af23-a769-4654-847f-958f3d479f4a"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="frame">
+      <iframe id="pbi3"
+        src="https://app.powerbi.com/reportEmbed?reportId=OUTRO_ID_AQUI&autoAuth=true&ctid=SEU_TENANT_ID"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="frame">
+      <iframe id="pbi4"
+        src="https://app.powerbi.com/reportEmbed?reportId=MAIS_UM_ID&autoAuth=true&ctid=SEU_TENANT_ID"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- 🔁 Script: auto-refresh + contador -->
+  <script>
+    const tempoRefresh = 10 * 60; // 10 minutos em segundos
+    let tempoRestante = tempoRefresh;
+
+    function atualizarContador() {
+      const minutos = Math.floor(tempoRestante / 60).toString().padStart(2, '0');
+      const segundos = (tempoRestante % 60).toString().padStart(2, '0');
+      document.getElementById('contador').innerText = `Próxima atualização em ${minutos}:${segundos}`;
+      if (tempoRestante > 0) {
+        tempoRestante--;
+      } else {
+        recarregarIframes();
+        tempoRestante = tempoRefresh;
+      }
+    }
+
+    function recarregarIframes() {
+      ['pbi1', 'pbi2', 'pbi3', 'pbi4'].forEach(id => {
+        const iframe = document.getElementById(id);
+        iframe.src = iframe.src;
+      });
+    }
+
+    setInterval(atualizarContador, 1000); // Atualiza contador a cada segundo
+  </script>
+
+</body>
+</html>
